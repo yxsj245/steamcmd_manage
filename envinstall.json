@@ -1,0 +1,37 @@
+{
+    "DirectX":{
+        "env": true,
+        "env_URL": true,
+        "env_URL_value":"https://download.microsoft.com/download/1/7/1/1718ccc4-6315-4d8e-9543-8e28a4e18c4c/dxwebsetup.exe",
+        "env_URL_read":"None",
+        "env_silent_args": "/Q"
+    },
+    "Visual C++ Redistributable 2022":{
+        "env": true,
+        "env_URL": true,
+        "env_URL_value":"https://aka.ms/vs/17/release/vc_redist.x64.exe",
+        "env_URL_read":"https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170",
+        "env_silent_args": "/install /quiet /norestart"
+    },
+    "Java Runtime Environment":{
+        "env": true,
+        "env_URL": true,
+        "env_URL_value":"https://javadl.oracle.com/webapps/download/AutoDL?BundleId=247136_10e8cce67c7843478f41411b7003171c",
+        "env_URL_read":"https://www.java.com/download/",
+        "env_silent_args": "/s"
+    },
+    ".NET Framework 4.8":{
+        "env": true,
+        "env_URL": true,
+        "env_URL_value":"https://go.microsoft.com/fwlink/?linkid=2088631",
+        "env_URL_read":"https://dotnet.microsoft.com/download/dotnet-framework/net48",
+        "env_silent_args": "/q /norestart"
+    },
+    "Python环境库":{
+        "env": true,
+        "env_URL": false,
+        "env_URL_value":"None",
+        "env_URL_read":"None",
+        "env_packages": ["requests", "psutil", "tqdm"]
+    }
+}

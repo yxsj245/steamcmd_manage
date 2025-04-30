@@ -1,0 +1,152 @@
+{
+    "The_Forest":{
+        "game_nameCN": "森林",
+        "appid": "556450",
+        "anonymous": true,
+        "script": false,
+        "script_name": "echo=none",
+        "tip": "游戏端口：8766 27016 UDP",
+        "create_mcsm": true,
+        "mcsm_start_cmd": "TheForestDedicatedServer.exe"
+    },
+    "Sons_of_the_Forest":{
+        "game_nameCN": "森林之子",
+        "appid": "2465200",
+        "anonymous": true,
+        "script": false,
+        "script_name": "echo=none",
+        "tip": "游戏端口：8766 27016 9700 UDP",
+        "create_mcsm": true,
+        "mcsm_start_cmd": "StartSOTFDedicated.bat"
+    },
+    "Space_Engineers":{
+        "game_nameCN": "太空工程师",
+        "appid": "298740",
+        "anonymous": true,
+        "script": false,
+        "script_name": "echo=none",
+        "tip": "游戏端口：8766 27016 UDP",
+        "create_mcsm": false,
+        "mcsm_start_cmd": ""
+    },
+    "ASTRONEER":{
+        "game_nameCN": "异星探险家",
+        "appid": "728470",
+        "anonymous": true,
+        "script": false,
+        "script_name": "echo=none",
+        "tip": "游戏端口：7777 tcp 此游戏建议搭配工具https://github.com/ricky-davis/AstroLauncher/releases ",
+        "create_mcsm": false,
+        "mcsm_start_cmd": ""
+    },
+    "Foundry":{
+        "game_nameCN": "铸造厂",
+        "appid": "2915550",
+        "anonymous": true,
+        "script": false,
+        "script_name": "echo=none",
+        "tip": "游戏端口：尚未确定",
+        "create_mcsm": true,
+        "mcsm_start_cmd": "FoundryDedicatedServerLauncher.bat"
+    },
+    "Abiotic_Factor":{
+        "game_nameCN": "非生物因素",
+        "appid": "2857200",
+        "anonymous": true,
+        "script": false,
+        "script_name": "echo=none",
+        "tip": "游戏端口：7777/udp 27015/udp",
+        "create_mcsm": true,
+        "mcsm_start_cmd": "AbioticFactorServer.exe"
+    },
+    "Barotrauma":{
+        "game_nameCN": "潜渊症",
+        "appid": "1026340",
+        "anonymous": true,
+        "script": false,
+        "script_name": "echo=none",
+        "tip": "游戏端口：27015/udp",
+        "create_mcsm": true,
+        "mcsm_start_cmd": "DedicatedServer.exe"
+    },
+    "Craftopia":{
+        "game_nameCN": "创世理想乡",
+        "appid": "1670340",
+        "anonymous": true,
+        "script": false,
+        "script_name": "echo=none",
+        "tip": "游戏端口：27015/udp",
+        "create_mcsm": true,
+        "mcsm_start_cmd": "Craftopia.exe"
+    },
+    "Conan_Exiles":{
+        "game_nameCN": "流放者柯南",
+        "appid": "443030",
+        "anonymous": true,
+        "script": false,
+        "script_name": "echo=none",
+        "tip": "游戏端口：7777/udp",
+        "create_mcsm": true,
+        "mcsm_start_cmd": "StartServer.bat"
+    },
+    "Night_of_the_Dead":{
+        "game_nameCN": "死亡之夜",
+        "appid": "1420710",
+        "anonymous": true,
+        "script": false,
+        "script_name": "echo=none",
+        "tip": "游戏端口：7777/udp",
+        "create_mcsm": true,
+        "mcsm_start_cmd": "StartServer.bat"
+    },
+    "The_Isle":{
+        "game_nameCN": "恐龙岛",
+        "appid": "412680",
+        "anonymous": true,
+        "script": false,
+        "script_name": "echo=none",
+        "tip": "游戏端口：27015/udp",
+        "create_mcsm": true,
+        "mcsm_start_cmd": "TheIsleServer.exe"
+    },
+    "Icarus":{ 
+        "game_nameCN": "翼星求生",
+        "appid": "2089300",
+        "anonymous": true,
+        "script": false,
+        "script_name": "echo=none",
+        "tip": "游戏端口：27015/udp",
+        "create_mcsm": true,
+        "mcsm_start_cmd": "IcarusServer.exe"
+    },
+    "Garry's_Mod":{ 
+        "game_nameCN": "盖瑞模组",
+        "appid": "4020",
+        "anonymous": true,
+        "script": false,
+        "script_name": "echo=none",
+        "tip": "游戏端口：27015/udp",
+        "create_mcsm": false,
+        "mcsm_start_cmd": ""
+    },
+    "Myth_of_Empires":{ 
+        "game_nameCN": "帝国神话",
+        "appid": "1794810",
+        "anonymous": true,
+        "script": false,
+        "script_name": "echo=none",
+        "tip": "游戏端口：27015/udp 27016/udp 7777/udp",
+        "create_mcsm": true,
+        "mcsm_start_cmd": "MOE\\Binaries\\Win64\\MOEServer.exe"
+    },
+    "Risk_of_Rain_2":{ 
+        "game_nameCN": "雨中冒险2",
+        "appid": "1180760",
+        "anonymous": true,
+        "script": false,
+        "script_name": "echo=none",
+        "tip": "游戏端口：27015/udp",
+        "create_mcsm": true,
+        "mcsm_start_cmd": "Risk of Rain 2.exe"
+    }
+}
