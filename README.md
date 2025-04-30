@@ -1,0 +1,2 @@
+# steamcmd_manage
+一个专注于WindowsSteamcmd的一键快速开服脚本和管理
