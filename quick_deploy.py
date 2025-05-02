@@ -15,7 +15,12 @@ DEBUG_MODE = False  # 设置为True开启调试模式
 
 class GameDeployer:
     def __init__(self):
-        self.current_dir = os.path.abspath(os.getcwd())
+        # 优先使用环境变量中的工作目录，确保在打包环境中使用程序运行目录
+        if 'STEAMCMD_WORKING_DIR' in os.environ:
+            self.current_dir = os.environ['STEAMCMD_WORKING_DIR']
+        else:
+            self.current_dir = os.path.abspath(os.getcwd())
+            
         self.games_dir = os.path.join(self.current_dir, "games")
         self.steamcmd_dir = os.path.join(self.current_dir, "steamcmd")
         self.steamcmd_exe = os.path.join(self.steamcmd_dir, "steamcmd.exe")
@@ -43,19 +48,17 @@ class GameDeployer:
             # 1. 当前目录
             os.path.join(self.current_dir, filename),
             # 2. 打包环境中的资源目录
-            filename if not getattr(sys, 'frozen', False) else os.path.join(sys._MEIPASS, filename),
+            os.path.join(os.environ.get('STEAMCMD_RESOURCE_DIR', ''), filename) if 'STEAMCMD_RESOURCE_DIR' in os.environ else None,
             # 3. 脚本所在目录
             os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
         ]
         
         # 尝试所有可能的路径
         for path in paths:
-            if os.path.exists(path):
-                print(f"找到配置文件: {path}")
+            if path and os.path.exists(path):
                 return path
         
         # 如果都找不到，返回默认路径
-        print(f"警告: 未找到配置文件 {filename}，使用默认路径")
         return os.path.join(self.current_dir, filename)
     
     def load_mcsm_config(self):
@@ -72,12 +75,42 @@ class GameDeployer:
                     self.mcsm_daemon_uuid = mcsm.get("DAEMON_UUID", self.mcsm_daemon_uuid)
                     self.mcsm_host_path = mcsm.get("HOST_PATH", self.mcsm_host_path)
                     
-                    print(f"已加载MCSManager配置:")
-                    print(f"面板地址: {self.mcsm_panel_url}")
-                    print(f"API密钥: {self.mcsm_api_key}")
-                    print(f"守护进程UUID: {self.mcsm_daemon_uuid}")
+                    # 只在API密钥已被修改的情况下显示配置信息
+                    if self.mcsm_api_key != "请替换为您的API密钥":
+                        print(f"已加载MCSManager配置:")
+                        print(f"面板地址: {self.mcsm_panel_url}")
+                    else:
+                        print("警告: 默认API密钥未被修改，请编辑config.json文件")
+            else:
+                print(f"警告: MCSManager配置文件不存在: {self.mcsm_config_file}")
+                
+                # 创建一个默认配置文件
+                self.create_default_config()
+                
         except Exception as e:
             print(f"加载MCSManager配置出错: {e}")
+            
+    def create_default_config(self):
+        """创建默认的config.json文件"""
+        try:
+            # 默认配置
+            default_config = {
+                "MCSM": {
+                    "PANEL_URL": self.mcsm_panel_url,
+                    "API_KEY": "请替换为您的API密钥",
+                    "DAEMON_UUID": self.mcsm_daemon_uuid,
+                    "HOST_PATH": self.mcsm_host_path
+                }
+            }
+            
+            # 尝试创建文件
+            with open(self.mcsm_config_file, 'w', encoding='utf-8') as f:
+                json.dump(default_config, f, ensure_ascii=False, indent=4)
+                
+            print(f"已创建默认配置文件: {self.mcsm_config_file}")
+            print("请编辑此文件以配置MCSManager连接信息")
+        except Exception as e:
+            print(f"创建默认配置文件时出错: {e}")
     
     def load_config(self):
         """加载配置文件"""

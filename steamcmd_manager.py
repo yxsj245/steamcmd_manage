@@ -135,6 +135,9 @@ class SteamCMDManager:
         # config.json不随exe打包，而是在本地目录中
         self.config_file = os.path.join(self.current_dir, "config.json")
         
+        # 检查并确保config.json存在
+        self.ensure_config_file()
+        
         # 创建端口扫描器
         self.port_scanner = PortScanner()
     
@@ -234,50 +237,31 @@ class SteamCMDManager:
             # 优先查找当前目录
             if os.path.exists(self.quick_deploy_script):
                 script_path = self.quick_deploy_script
-                print(f"找到本地脚本: {script_path}")
             # 其次查找资源目录
             elif os.path.exists(self.quick_deploy_resource):
                 script_path = self.quick_deploy_resource
-                print(f"找到内嵌脚本: {script_path}")
             # 如果都不存在，提示错误
             else:
                 print(f"错误: 快速部署脚本不存在!")
-                print(f"已检查以下路径:")
-                print(f"1. {self.quick_deploy_script}")
-                print(f"2. {self.quick_deploy_resource}")
                 input("按回车键返回主菜单...")
                 return
             
-            print(f"正在启动快速部署脚本: {script_path}")
-            
             # 如果是打包后的环境，使用内嵌脚本
             if getattr(sys, 'frozen', False):
-                print("检测到打包环境，尝试提取脚本和资源文件...")
                 # 提取脚本和配置文件到临时目录
                 temp_script = self._extract_script("quick_deploy.py")
                 temp_config = self._extract_script("installgame.json")
                 
                 if temp_script:
                     script_path = temp_script
-                    print(f"已提取脚本到临时路径: {script_path}")
-                else:
-                    print("提取脚本失败，尝试直接使用内嵌脚本")
-                
-                if temp_config:
-                    print(f"已提取配置文件到临时路径: {temp_config}")
-                else:
-                    print("提取配置文件失败")
             
-            # 直接导入并运行脚本，而不是使用subprocess
-            print(f"开始执行脚本: {script_path}")
-            
+            # 直接导入并运行脚本
             try:
                 # 保存当前工作目录
                 current_dir = os.getcwd()
                 
-                # 切换到脚本所在目录
-                script_dir = os.path.dirname(script_path)
-                os.chdir(script_dir)
+                # 切换到当前工作目录（程序运行目录）
+                os.chdir(current_dir)
                 
                 # 将资源目录路径添加到sys.path中，确保脚本可以导入其他模块
                 if self.resource_dir not in sys.path:
@@ -285,19 +269,18 @@ class SteamCMDManager:
                 
                 # 设置环境变量，便于脚本访问资源
                 os.environ['STEAMCMD_RESOURCE_DIR'] = self.resource_dir
+                os.environ['STEAMCMD_WORKING_DIR'] = current_dir
                 
                 # 打包环境下，直接导入并执行模块
                 script_name = os.path.basename(script_path).replace('.py', '')
-                print(f"导入模块: {script_name}")
                 
                 import importlib.util
                 spec = importlib.util.spec_from_file_location(script_name, script_path)
                 module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(module)
                 
-                # 如果模块有main函数，调用它
+                # 调用main函数
                 if hasattr(module, 'main'):
-                    print("调用主函数...")
                     module.main()
                 else:
                     print("警告: 脚本中没有找到main()函数!")
@@ -310,12 +293,9 @@ class SteamCMDManager:
                 import traceback
                 traceback.print_exc()
             
-            print("\n快速部署脚本已退出")
-            input("按回车键返回主菜单...")
+            input("\n快速部署脚本已退出，按回车键返回主菜单...")
         except Exception as e:
             print(f"运行快速部署脚本时出错: {e}")
-            import traceback
-            traceback.print_exc()
             input("按回车键返回主菜单...")
     
     def _extract_script(self, script_name):
@@ -861,6 +841,40 @@ class SteamCMDManager:
             input("完成安装后，请按回车键继续...")
         else:
             print(f"错误: 无法找到 {name} 的下载方式或下载地址!")
+    
+    def ensure_config_file(self):
+        """检查config.json是否存在，如果不存在则创建默认配置"""
+        if not os.path.exists(self.config_file):
+            print(f"未找到配置文件，正在创建默认配置: {self.config_file}")
+            
+            # 默认配置
+            default_config = {
+                "MCSM": {
+                    "PANEL_URL": "http://localhost:23333",
+                    "API_KEY": "请替换为您的API密钥",
+                    "DAEMON_UUID": "请替换为您的守护进程UUID",
+                    "HOST_PATH": "/home/game_data"
+                },
+                "STEAM": {
+                    "DEFAULT_USERNAME": "anonymous",
+                    "REMEMBER_PASSWORD": False
+                },
+                "APP": {
+                    "AUTO_CHECK_UPDATE": True,
+                    "LANGUAGE": "zh_CN",
+                    "THEME": "dark"
+                }
+            }
+            
+            try:
+                # 创建配置文件
+                with open(self.config_file, 'w', encoding='utf-8') as f:
+                    json.dump(default_config, f, ensure_ascii=False, indent=4)
+                print("默认配置文件已创建")
+            except Exception as e:
+                print(f"创建配置文件时出错: {e}")
+        
+        return os.path.exists(self.config_file)
 
 def clear_screen():
     """清除终端屏幕"""
