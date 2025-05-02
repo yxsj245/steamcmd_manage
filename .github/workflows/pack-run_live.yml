@@ -33,16 +33,16 @@ jobs:
     
     - name: 安装pip环境
       run: |
-        python -m pip install --upgrade pip #更新pip
-        python -m pip install pyinstaller #安装打包工具
-        python -m pip install psutil requests #安装的pip库
+        python -m pip install --upgrade pip
+        python -m pip install pyinstaller
+        python -m pip install psutil requests
 
     - name: 打包项目
       run: |
-        # 确认文件存在
+        # 列出当前目录文件确认内容
         dir
-        # 打包主程序并包含JSON文件
-        pyinstaller -F steamcmd_manager.py --add-data "installgame.json;." --add-data "uninstallgame.json;."
+        # 打包主程序并包含实际存在的JSON文件
+        pyinstaller -F steamcmd_manager.py --add-data "installgame.json;." --add-data "envinstall.json;." --add-data "config.json;."
 
     - name: 检查打包输出
       run: |
@@ -51,16 +51,17 @@ jobs:
         # 列出build目录内容，用于调试
         dir build
 
-    - name: 上传文件
+    - name: 上传可执行文件
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.CODE_NAME }}
-        path: dist/steamcmd_manager.exe  # 修改为实际的输出文件名
+        path: dist/steamcmd_manager.exe
 
-    - name: 上传JSON文件
+    - name: 上传配置文件
       uses: actions/upload-artifact@v4
       with:
         name: config_files
         path: |
           installgame.json
-          uninstallgame.json
+          envinstall.json
+          config.json
