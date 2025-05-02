@@ -272,30 +272,21 @@ class SteamCMDManager:
                 # 切换到脚本所在目录
                 os.chdir(script_dir)
                 
-                # 导入脚本并执行
-                if getattr(sys, 'frozen', False):
-                    # 打包环境下使用subprocess
-                    python_executable = sys.executable
-                    print(f"使用Python解释器: {python_executable}")
-                    result = subprocess.run([python_executable, script_path], capture_output=True, text=True)
-                    print("\n脚本输出:")
-                    print(result.stdout)
-                    if result.stderr:
-                        print("\n脚本错误:")
-                        print(result.stderr)
+                # 打包环境下，直接导入并执行模块
+                script_name = os.path.basename(script_path).replace('.py', '')
+                print(f"导入模块: {script_name}")
+                
+                import importlib.util
+                spec = importlib.util.spec_from_file_location(script_name, script_path)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                
+                # 如果模块有main函数，调用它
+                if hasattr(module, 'main'):
+                    print("调用主函数...")
+                    module.main()
                 else:
-                    # 非打包环境下可以直接导入
-                    script_name = os.path.basename(script_path).replace('.py', '')
-                    print(f"导入模块: {script_name}")
-                    import importlib.util
-                    spec = importlib.util.spec_from_file_location(script_name, script_path)
-                    module = importlib.util.module_from_spec(spec)
-                    spec.loader.exec_module(module)
-                    
-                    # 如果模块有main函数，调用它
-                    if hasattr(module, 'main'):
-                        print("调用主函数...")
-                        module.main()
+                    print("警告: 脚本中没有找到main()函数!")
                 
                 # 恢复工作目录
                 os.chdir(current_dir)
