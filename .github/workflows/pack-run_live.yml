@@ -7,11 +7,11 @@ jobs:
   build:
     runs-on: windows-latest
     env:
-      CODE_NAME: steamcmdmanage_x64 # 定义 文件名 
+      CODE_NAME: steamcmdmanage_x64 # 定义文件名 
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ "3.12"]
+        python-version: [ "3.12" ]
 
     steps:
     # 签出代码
@@ -39,10 +39,28 @@ jobs:
 
     - name: 打包项目
       run: |
-        pyinstaller -F steamcmd_manager.py
+        # 确认文件存在
+        dir
+        # 打包主程序并包含JSON文件
+        pyinstaller -F steamcmd_manager.py --add-data "installgame.json;." --add-data "uninstallgame.json;."
+
+    - name: 检查打包输出
+      run: |
+        # 列出dist目录内容，确认打包输出文件名
+        dir dist
+        # 列出build目录内容，用于调试
+        dir build
 
     - name: 上传文件
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.CODE_NAME }}
-        path: dist/run_live.exe
+        path: dist/steamcmd_manager.exe  # 修改为实际的输出文件名
+
+    - name: 上传JSON文件
+      uses: actions/upload-artifact@v4
+      with:
+        name: config_files
+        path: |
+          installgame.json
+          uninstallgame.json
