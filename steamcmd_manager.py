@@ -123,10 +123,30 @@ class SteamCMDManager:
         self.steamcmd_dir = os.path.join(self.current_dir, "steamcmd")
         self.steamcmd_exe = os.path.join(self.steamcmd_dir, "steamcmd.exe")
         self.quick_deploy_script = os.path.join(self.current_dir, "quick_deploy.py")
-        self.env_config_file = os.path.join(self.current_dir, "envinstall.json")
+        
+        # 获取资源文件路径
+        self.resource_dir = self._get_resource_dir()
+        self.env_config_file = os.path.join(self.resource_dir, "envinstall.json")
+        self.install_game_config = os.path.join(self.resource_dir, "installgame.json")
+        self.config_file = os.path.join(self.resource_dir, "config.json")
         
         # 创建端口扫描器
         self.port_scanner = PortScanner()
+    
+    def _get_resource_dir(self) -> str:
+        """获取资源文件目录路径"""
+        try:
+            # 如果是打包后的程序
+            if getattr(sys, 'frozen', False):
+                # 获取程序所在目录
+                base_path = sys._MEIPASS
+            else:
+                # 如果是直接运行的Python脚本
+                base_path = self.current_dir
+            
+            return base_path
+        except Exception:
+            return self.current_dir
     
     def check_steamcmd_installed(self) -> bool:
         """检查steamcmd是否已安装"""
@@ -141,6 +161,17 @@ class SteamCMDManager:
     def install_steamcmd(self) -> bool:
         """安装steamcmd"""
         print("正在安装SteamCMD...")
+        
+        # 检查当前路径是否包含非ASCII字符
+        current_path = os.path.abspath(self.current_dir)
+        if not all(ord(c) < 128 for c in current_path):
+            print("\n错误: 当前路径包含非英文字符!")
+            print(f"当前路径: {current_path}")
+            print("\nSteamCMD无法在包含非英文字符的路径中运行。")
+            print("请将程序移动到仅包含英文字母、数字和基本符号的路径下，例如:")
+            print("C:\\SteamCMD")
+            print("D:\\Games\\SteamServer")
+            return False
         
         # 创建steamcmd目录
         os.makedirs(self.steamcmd_dir, exist_ok=True)
