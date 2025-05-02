@@ -379,20 +379,13 @@ def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def main():
-    clear_screen()
-    print("=" * 50)
-    print("SteamCMD 游戏快速部署工具")
-    print("=" * 50)
-    print("该工具将根据installgame.json配置文件安装游戏服务器")
-    if DEBUG_MODE:
-        print("⚠️ 调试模式已开启，将跳过游戏安装过程")
-    print("=" * 50)
-    
+    """主函数，用于作为模块导入时调用"""
     deployer = GameDeployer()
     
-    # 检查SteamCMD
-    if not deployer.check_steamcmd_installed() and not DEBUG_MODE:
-        input("按回车键退出...")
+    # 检查SteamCMD是否已安装
+    if not deployer.check_steamcmd_installed():
+        print("SteamCMD未安装，请先安装SteamCMD")
+        input("按回车键返回...")
         return
     
     # 加载配置
@@ -479,51 +472,24 @@ def main():
     if DEBUG_MODE:
         folder_name = game_key.replace(" ", "_")
         install_dir = os.path.join(deployer.games_dir, folder_name)
-        
-        # 确保目录存在
         os.makedirs(install_dir, exist_ok=True)
-        
-        # 创建启动脚本
-        script_created = False
-        if config.get("script", False):
-            # 直接使用script_name的内容，无论是什么值
-            if "script_name" in config:
-                script_content = config["script_name"]
-                deployer.create_launch_script(config['appid'], display_name, install_dir, script_content)
-                script_created = True
-                print(f"已创建启动脚本")
-            else:
-                # 如果script为true但没有提供script_name，创建一个默认的启动脚本
-                deployer.create_default_launch_script(config['appid'], display_name, install_dir)
-                script_created = True
-                print(f"已创建默认启动脚本")
-        
-        # 直接询问是否创建MCSM实例
-        create_confirm = input("\n是否创建MCSManager实例? (y/n): ").lower()
-        if create_confirm == 'y':
-            # 获取启动命令
-            mcsm_start_cmd = config.get("mcsm_start_cmd", "")
-            
-            print(f"\n正在为游戏创建MCSM实例...")
-            instance_uuid = deployer.create_mcsm_instance(
-                game_key, 
-                folder_name, 
-                display_name,
-                mcsm_start_cmd
-            )
-            
-            if instance_uuid:
-                print(f"MCSM实例创建成功，实例UUID: {instance_uuid}")
-            else:
-                print(f"MCSM实例创建失败")
     else:
-        # 正常模式：安装游戏
-        if deployer.install_game(game_key, config):
-            print("\n安装完成!")
-        else:
-            print("\n安装失败!")
+        # 安装游戏
+        result = deployer.install_game(game_key, config)
+        if not result:
+            input("\n游戏安装失败，按回车键退出...")
+            return
     
-    input("按回车键退出...")
+    # 如果需要创建MCSM实例
+    if config.get("create_mcsm", False):
+        create_instance = input("\n是否创建MCSM实例? (y/n): ")
+        if create_instance.lower() == 'y':
+            folder_name = game_key.replace(" ", "_")
+            # 使用配置文件中的启动命令，如果没有则使用空字符串
+            start_command = config.get("mcsm_start_cmd", "")
+            deployer.create_mcsm_instance(game_key, folder_name, display_name, start_command)
+    
+    input("\n操作完成，按回车键退出...")
 
 if __name__ == "__main__":
     main() 

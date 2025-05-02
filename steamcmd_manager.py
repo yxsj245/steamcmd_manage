@@ -234,9 +234,11 @@ class SteamCMDManager:
             # 优先查找当前目录
             if os.path.exists(self.quick_deploy_script):
                 script_path = self.quick_deploy_script
+                print(f"找到本地脚本: {script_path}")
             # 其次查找资源目录
             elif os.path.exists(self.quick_deploy_resource):
                 script_path = self.quick_deploy_resource
+                print(f"找到内嵌脚本: {script_path}")
             # 如果都不存在，提示错误
             else:
                 print(f"错误: 快速部署脚本不存在!")
@@ -247,22 +249,68 @@ class SteamCMDManager:
                 return
             
             print(f"正在启动快速部署脚本: {script_path}")
-            python_executable = sys.executable
             
             # 如果是打包后的环境，使用内嵌脚本
             if getattr(sys, 'frozen', False):
+                print("检测到打包环境，尝试提取脚本...")
                 # 提取资源中的脚本到临时目录
                 temp_script = self._extract_script("quick_deploy.py")
                 if temp_script:
                     script_path = temp_script
+                    print(f"已提取脚本到临时路径: {script_path}")
+                else:
+                    print("提取失败，尝试直接使用内嵌脚本")
             
-            # 运行脚本
-            subprocess.run([python_executable, script_path])
+            # 直接导入并运行脚本，而不是使用subprocess
+            print(f"开始执行脚本: {script_path}")
+            
+            try:
+                # 保存当前工作目录
+                current_dir = os.getcwd()
+                script_dir = os.path.dirname(script_path)
+                
+                # 切换到脚本所在目录
+                os.chdir(script_dir)
+                
+                # 导入脚本并执行
+                if getattr(sys, 'frozen', False):
+                    # 打包环境下使用subprocess
+                    python_executable = sys.executable
+                    print(f"使用Python解释器: {python_executable}")
+                    result = subprocess.run([python_executable, script_path], capture_output=True, text=True)
+                    print("\n脚本输出:")
+                    print(result.stdout)
+                    if result.stderr:
+                        print("\n脚本错误:")
+                        print(result.stderr)
+                else:
+                    # 非打包环境下可以直接导入
+                    script_name = os.path.basename(script_path).replace('.py', '')
+                    print(f"导入模块: {script_name}")
+                    import importlib.util
+                    spec = importlib.util.spec_from_file_location(script_name, script_path)
+                    module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(module)
+                    
+                    # 如果模块有main函数，调用它
+                    if hasattr(module, 'main'):
+                        print("调用主函数...")
+                        module.main()
+                
+                # 恢复工作目录
+                os.chdir(current_dir)
+                
+            except Exception as e:
+                print(f"执行脚本时出错: {e}")
+                import traceback
+                traceback.print_exc()
             
             print("\n快速部署脚本已退出")
             input("按回车键返回主菜单...")
         except Exception as e:
             print(f"运行快速部署脚本时出错: {e}")
+            import traceback
+            traceback.print_exc()
             input("按回车键返回主菜单...")
     
     def _extract_script(self, script_name):
