@@ -128,7 +128,9 @@ class SteamCMDManager:
         self.resource_dir = self._get_resource_dir()
         self.env_config_file = os.path.join(self.resource_dir, "envinstall.json")
         self.install_game_config = os.path.join(self.resource_dir, "installgame.json")
-        self.config_file = os.path.join(self.resource_dir, "config.json")
+        
+        # config.json不随exe打包，而是在本地目录中
+        self.config_file = os.path.join(self.current_dir, "config.json")
         
         # 创建端口扫描器
         self.port_scanner = PortScanner()
