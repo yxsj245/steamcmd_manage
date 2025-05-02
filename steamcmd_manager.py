@@ -122,12 +122,15 @@ class SteamCMDManager:
         
         self.steamcmd_dir = os.path.join(self.current_dir, "steamcmd")
         self.steamcmd_exe = os.path.join(self.steamcmd_dir, "steamcmd.exe")
-        self.quick_deploy_script = os.path.join(self.current_dir, "quick_deploy.py")
         
         # 获取资源文件路径
         self.resource_dir = self._get_resource_dir()
         self.env_config_file = os.path.join(self.resource_dir, "envinstall.json")
         self.install_game_config = os.path.join(self.resource_dir, "installgame.json")
+        
+        # Python文件路径 - 两个位置都检查
+        self.quick_deploy_script = os.path.join(self.current_dir, "quick_deploy.py")
+        self.quick_deploy_resource = os.path.join(self.resource_dir, "quick_deploy.py")
         
         # config.json不随exe打包，而是在本地目录中
         self.config_file = os.path.join(self.current_dir, "config.json")
@@ -226,20 +229,62 @@ class SteamCMDManager:
     def run_quick_deploy(self) -> None:
         """运行快速部署脚本"""
         try:
-            if not os.path.exists(self.quick_deploy_script):
-                print(f"错误: 快速部署脚本 {self.quick_deploy_script} 不存在!")
+            script_path = None
+            
+            # 优先查找当前目录
+            if os.path.exists(self.quick_deploy_script):
+                script_path = self.quick_deploy_script
+            # 其次查找资源目录
+            elif os.path.exists(self.quick_deploy_resource):
+                script_path = self.quick_deploy_resource
+            # 如果都不存在，提示错误
+            else:
+                print(f"错误: 快速部署脚本不存在!")
+                print(f"已检查以下路径:")
+                print(f"1. {self.quick_deploy_script}")
+                print(f"2. {self.quick_deploy_resource}")
                 input("按回车键返回主菜单...")
                 return
             
-            print("正在启动快速部署脚本...")
+            print(f"正在启动快速部署脚本: {script_path}")
             python_executable = sys.executable
-            subprocess.run([python_executable, self.quick_deploy_script])
+            
+            # 如果是打包后的环境，使用内嵌脚本
+            if getattr(sys, 'frozen', False):
+                # 提取资源中的脚本到临时目录
+                temp_script = self._extract_script("quick_deploy.py")
+                if temp_script:
+                    script_path = temp_script
+            
+            # 运行脚本
+            subprocess.run([python_executable, script_path])
             
             print("\n快速部署脚本已退出")
             input("按回车键返回主菜单...")
         except Exception as e:
             print(f"运行快速部署脚本时出错: {e}")
             input("按回车键返回主菜单...")
+    
+    def _extract_script(self, script_name):
+        """将内嵌脚本提取到临时文件中"""
+        try:
+            import tempfile
+            
+            # 创建临时文件
+            temp_dir = tempfile.gettempdir()
+            temp_script = os.path.join(temp_dir, script_name)
+            
+            # 如果是打包环境，从资源目录复制
+            if getattr(sys, 'frozen', False) and os.path.exists(os.path.join(self.resource_dir, script_name)):
+                source_script = os.path.join(self.resource_dir, script_name)
+                with open(source_script, 'rb') as src, open(temp_script, 'wb') as dst:
+                    dst.write(src.read())
+                return temp_script
+            
+            return None
+        except Exception as e:
+            print(f"提取脚本时出错: {e}")
+            return None
     
     def install_game(self, app_id: str, username: str = "anonymous", password: str = "") -> bool:
         """使用SteamCMD安装游戏"""
