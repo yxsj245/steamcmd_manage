@@ -252,14 +252,21 @@ class SteamCMDManager:
             
             # 如果是打包后的环境，使用内嵌脚本
             if getattr(sys, 'frozen', False):
-                print("检测到打包环境，尝试提取脚本...")
-                # 提取资源中的脚本到临时目录
+                print("检测到打包环境，尝试提取脚本和资源文件...")
+                # 提取脚本和配置文件到临时目录
                 temp_script = self._extract_script("quick_deploy.py")
+                temp_config = self._extract_script("installgame.json")
+                
                 if temp_script:
                     script_path = temp_script
                     print(f"已提取脚本到临时路径: {script_path}")
                 else:
-                    print("提取失败，尝试直接使用内嵌脚本")
+                    print("提取脚本失败，尝试直接使用内嵌脚本")
+                
+                if temp_config:
+                    print(f"已提取配置文件到临时路径: {temp_config}")
+                else:
+                    print("提取配置文件失败")
             
             # 直接导入并运行脚本，而不是使用subprocess
             print(f"开始执行脚本: {script_path}")
@@ -267,10 +274,17 @@ class SteamCMDManager:
             try:
                 # 保存当前工作目录
                 current_dir = os.getcwd()
-                script_dir = os.path.dirname(script_path)
                 
                 # 切换到脚本所在目录
+                script_dir = os.path.dirname(script_path)
                 os.chdir(script_dir)
+                
+                # 将资源目录路径添加到sys.path中，确保脚本可以导入其他模块
+                if self.resource_dir not in sys.path:
+                    sys.path.insert(0, self.resource_dir)
+                
+                # 设置环境变量，便于脚本访问资源
+                os.environ['STEAMCMD_RESOURCE_DIR'] = self.resource_dir
                 
                 # 打包环境下，直接导入并执行模块
                 script_name = os.path.basename(script_path).replace('.py', '')

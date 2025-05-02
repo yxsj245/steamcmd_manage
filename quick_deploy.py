@@ -19,7 +19,9 @@ class GameDeployer:
         self.games_dir = os.path.join(self.current_dir, "games")
         self.steamcmd_dir = os.path.join(self.current_dir, "steamcmd")
         self.steamcmd_exe = os.path.join(self.steamcmd_dir, "steamcmd.exe")
-        self.config_file = os.path.join(self.current_dir, "installgame.json")
+        
+        # 在打包环境中查找配置文件
+        self.config_file = self._get_resource_path("installgame.json")
         self.mcsm_config_file = os.path.join(self.current_dir, "config.json")
         self.installed_games_file = os.path.join(self.current_dir, "installed_games.json")
         
@@ -34,6 +36,27 @@ class GameDeployer:
         
         # 确保games目录存在
         os.makedirs(self.games_dir, exist_ok=True)
+    
+    def _get_resource_path(self, filename):
+        """获取资源文件路径，支持打包环境"""
+        paths = [
+            # 1. 当前目录
+            os.path.join(self.current_dir, filename),
+            # 2. 打包环境中的资源目录
+            filename if not getattr(sys, 'frozen', False) else os.path.join(sys._MEIPASS, filename),
+            # 3. 脚本所在目录
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
+        ]
+        
+        # 尝试所有可能的路径
+        for path in paths:
+            if os.path.exists(path):
+                print(f"找到配置文件: {path}")
+                return path
+        
+        # 如果都找不到，返回默认路径
+        print(f"警告: 未找到配置文件 {filename}，使用默认路径")
+        return os.path.join(self.current_dir, filename)
     
     def load_mcsm_config(self):
         """加载MCSManager配置"""
