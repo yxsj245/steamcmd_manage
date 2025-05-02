@@ -41,10 +41,12 @@ jobs:
       run: |
         # 列出当前目录文件确认内容
         dir
-        # 打包主程序并包含需要的JSON文件 - 注意使用PowerShell行继续符
+        # 打包主程序并包含所有需要的文件
         pyinstaller -F steamcmd_manager.py `
           --add-data "installgame.json;." `
           --add-data "envinstall.json;." `
+          --add-data "quick_deploy.py;." `
+          --add-data "environment_utils.py;." `
           --hidden-import=psutil `
           --hidden-import=requests `
           --clean
