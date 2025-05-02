@@ -35,14 +35,19 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install pyinstaller
-        python -m pip install psutil requests
+        python -m pip install -r requirements.txt
 
     - name: 打包项目
       run: |
         # 列出当前目录文件确认内容
         dir
-        # 打包主程序并包含实际存在的JSON文件
-        pyinstaller -F steamcmd_manager.py --add-data "installgame.json;." --add-data "envinstall.json;." --add-data "config.json;."
+        # 打包主程序并包含需要的JSON文件
+        pyinstaller -F steamcmd_manager.py ^
+          --add-data "installgame.json;." ^
+          --add-data "envinstall.json;." ^
+          --hidden-import=psutil ^
+          --hidden-import=requests ^
+          --clean
 
     - name: 检查打包输出
       run: |
@@ -57,11 +62,10 @@ jobs:
         name: ${{ env.CODE_NAME }}
         path: dist/steamcmd_manager.exe
 
-    - name: 上传配置文件
+    - name: 上传配置文件模板
       uses: actions/upload-artifact@v4
       with:
-        name: config_files
+        name: config_template
         path: |
           installgame.json
           envinstall.json
-          config.json
