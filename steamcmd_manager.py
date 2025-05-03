@@ -891,11 +891,24 @@ def show_menu():
     print("3. 查看/启动已安装的游戏服务器")
     print("4. 使用配置文件快速部署游戏")
     print("5. 安装环境依赖")
+    print("6. 关于项目")
     print("0. 退出")
     print("=" * 30)
     
-    choice = input("请选择操作 [0-5]: ")
+    choice = input("请选择操作 [0-6]: ")
     return choice
+
+def show_about():
+    """显示关于项目的信息"""
+    clear_screen()
+    print("\n" + "=" * 50)
+    print("关于 SteamCMD 服务器管理工具")
+    print("=" * 50)
+    print("项目采用完全开放的MIT开源协议，您可以任意修改以及二次开发。但请注明原作者。")
+    print("\nGitHub：https://github.com/yxsj245/steamcmd_manage")
+    print("Gitee：https://gitee.com/xiao-zhu245/steamcmd_manage")
+    print("\n" + "=" * 50)
+    input("\n按回车键返回主菜单...")
 
 def main():
     manager = SteamCMDManager()
@@ -951,6 +964,9 @@ def main():
         elif choice == '5':
             clear_screen()
             manager.install_environment_dependencies()
+            
+        elif choice == '6':
+            show_about()
         
         elif choice == '0':
             clear_screen()

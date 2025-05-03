@@ -450,21 +450,53 @@ def main():
         input("配置加载失败，按回车键退出...")
         return
     
-    # 显示游戏列表
-    print("\n可安装的游戏列表:")
-    print("-" * 50)
+    # 将游戏分类为Windows独占和全平台游戏
+    windows_only_games = []
+    cross_platform_games = []
     
-    valid_games = []
-    for i, (game_key, config) in enumerate(all_configs.items(), 1):
+    for game_key, config in all_configs.items():
         if deployer.validate_game_config(game_key, config):
-            valid_games.append((game_key, config))
+            if config.get("windows", False):  # 检查windows标记
+                windows_only_games.append((game_key, config))
+            else:
+                cross_platform_games.append((game_key, config))
+    
+    # 显示游戏列表，先显示Windows独占游戏
+    print("\n可安装的游戏列表:")
+    
+    # 显示Windows独占游戏
+    if windows_only_games:
+        print("\n" + "=" * 40)
+        print("Windows服务端独占")
+        print("=" * 40)
+        
+        for i, (game_key, config) in enumerate(windows_only_games, 1):
             game_name_cn = config.get("game_nameCN", "")
             game_name_en = config.get("game_nameEN", game_key)
             display_name = f"{game_name_cn} / {game_name_en}" if game_name_cn and game_name_en else (game_name_cn or game_name_en)
             create_mcsm = "是" if config.get("create_mcsm", False) else "否"
             print(f"{i}. {display_name} (AppID: {config.get('appid', 'N/A')}, 创建MCSM实例: {create_mcsm})")
     
-    print("-" * 50)
+    # 显示全平台游戏
+    if cross_platform_games:
+        print("\n" + "=" * 40)
+        print("全平台")
+        print("=" * 40)
+        print("温馨提示：由于时间原因，这些游戏没有经过测试，可能存在数据错误以及无法开服的问题，")
+        print("需要自行搜索开服指南，如果你愿意更欢迎前往GitHub帮助我们改善快速部署配置文件具体内容")
+        print("-" * 40)
+        
+        for i, (game_key, config) in enumerate(cross_platform_games, len(windows_only_games) + 1):
+            game_name_cn = config.get("game_nameCN", "")
+            game_name_en = config.get("game_nameEN", game_key)
+            display_name = f"{game_name_cn} / {game_name_en}" if game_name_cn and game_name_en else (game_name_cn or game_name_en)
+            create_mcsm = "是" if config.get("create_mcsm", False) else "否"
+            print(f"{i}. {display_name} (AppID: {config.get('appid', 'N/A')}, 创建MCSM实例: {create_mcsm})")
+    
+    print("-" * 40)
+    
+    # 合并所有有效游戏列表用于选择
+    valid_games = windows_only_games + cross_platform_games
     
     if not valid_games:
         print("没有有效的游戏配置!")
@@ -499,6 +531,7 @@ def main():
     print("\n即将安装以下游戏:")
     print(f"游戏名称: {display_name}")
     print(f"AppID: {config['appid']}")
+    print(f"类型: {'Windows独占' if config.get('windows', False) else '全平台'}")
     
     if not DEBUG_MODE:
         print(f"登录方式: {'匿名账户' if config.get('anonymous', True) else '需要Steam账户'}")
